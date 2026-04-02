@@ -1,11 +1,11 @@
 import chromadb
 from chromadb.utils import embedding_functions
-from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, HTTPException, status
 from chromadb.errors import ChromaError
 from ollama import chat, ChatResponse, ResponseError
 from pydantic import BaseModel
 from typing import Optional
+import httpx
 import uuid
 
 app = FastAPI()
@@ -108,3 +108,21 @@ async def asking(data:question):
     #Остальные ошибки
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Внутренняя ошибка: {e}")
+
+#Эндпоинт для проверки работоспособности Ollama    
+@app.get("/health")
+async def health_check():
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get("http://localhost:11434/api/tags", timeout=5.0) # Отправляем GET-запрос к Ollama с таймаутом в 5 секунд
+        if response.status_code == 200:
+            return {"status": "healthy",
+                     "ollama": "connected"}
+        else:
+            raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=f"Ollama вернул неожиданный статус: {response.status_code}")
+    except httpx.TimeoutException:
+        raise HTTPException(status_code=status.HTTP_408_REQUEST_TIMEOUT, detail="Ollama не успел ответить за отведённое время")
+    except httpx.ConnectError:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Не удалось подключиться к Ollama. Убедитесь, что он запущен")
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Ошибка при проверке здоровья:{e}")

@@ -1,4 +1,5 @@
 import streamlit as st
+from pypdf import PdfReader
 import requests
 
 API_URL = "http://localhost:8000"
@@ -12,9 +13,13 @@ if 'doc_id' not in st.session_state:
 
 #Загрузка документа
 st.header("1. Загрузить документ")
-uploaded_file = st.file_uploader("Выберите текстовый файл", type=["txt"])
+uploaded_file = st.file_uploader("Выберите текстовый файл", type=["txt", "pdf"])
 if uploaded_file:
-    text = uploaded_file.read().decode("utf-8")
+    if uploaded_file.name.endswith(".pdf"):
+        page =PdfReader(uploaded_file)
+        text = page.extract_text()
+    else:    
+        text = uploaded_file.read().decode("utf-8")
     if st.button("Загрузить"):
         with st.spinner("Загружаю и индексирую..."):
             response = requests.post(f"{API_URL}/upload", json={"text": text})
@@ -29,6 +34,14 @@ if uploaded_file:
 st.header("2. Задать вопрос")
 question = st.text_input("Введите вопрос:")
 if st.button("Спросить"):
+    try:
+        health_resp = requests.get(f"{API_URL}/health")
+        if health_resp.status_code != 200:
+            st.error("Ollama не запущен. Запустите `ollama serve`")
+            st.stop()
+    except:
+        st.error("Не удалось подключиться к серверу")
+        st.stop()
     if st.session_state.doc_id is None:
         st.warning("Сначала загрузите документ")
     else:   
