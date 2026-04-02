@@ -102,9 +102,9 @@ async def asking(data:question):
     #Ошбика на стороне ChromDB
     except ChromaError as e:
         raise HTTPException(status_code=503, detail=f"Ошибка векторной базы: {e}")
-    #Ошбика ошбика Ollama
+    #Ошбика Ollama
     except ResponseError as e:
         raise HTTPException(status_code=503, detail=f"Ошибка модели: {e}")
-    #Отсальные ошибки
+    #Остальные ошибки
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Внутренняя ошибка: {e}")
