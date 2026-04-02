@@ -17,7 +17,7 @@ RAG Bot on Local Models
 2. Установите зависимости: `pip install -r requirements.txt`
 3. Запустите сервер: `uvicorn main:app --reload`
 4. Запустите визуал: `streamlit run app.py`
-5. Открыть http://localhost:8501
+5. Откройте http://localhost:8501
 
 ## Структура проекта
 app.py - Отвечает за графический интерфейс
