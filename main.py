@@ -53,7 +53,7 @@ async def upload(data:document_upload):
         chunks = split_text(data.text, data.chunk_size, data.overlap)
 
         for i, chunk in enumerate(chunks):
-            chunk_id = f"{data.doc_id}_{i}"
+            chunk_id = f"{doc_id}_{i}"
             ids.append(chunk_id)
             documents.append(chunk)
             metadatas.append({"doc_id": doc_id, "chunk_index": i})
@@ -83,7 +83,7 @@ async def asking(data:question):
     try:
         response = collection.query( query_texts=[data.question], n_results=data.n_results)
         chunks = response["documents"][0]
-        if not chunks or chunks == None: #Проверка, если ничего не нашло, то запрос к ИИ не отправляется
+        if not chunks: #Проверка, если ничего не нашло, то запрос к ИИ не отправляется
             return {
                 "Ответ": "Ничего не найдено"
             }

@@ -21,9 +21,9 @@ if uploaded_file:
             if response.status_code == 200:
                 data = response.json()
                 st.success(f"Документ загружен! ID: {data['doc_id']}, чанков: {data['chunks_amount']}")
+                st.session_state.doc_id = response.json()["doc_id"]
             else:
                 st.error(f"Ошибка: {response.status_code} - {response.text}")
-    st.session_state.doc_id = response.json()["doc_id"]
 
 #Задать вопрос
 st.header("2. Задать вопрос")
